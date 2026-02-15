@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ytdlp-gui"
+version = "0.1.0"
+description = "Cross-platform GUI video downloader powered by yt-dlp"
+requires-python = ">=3.10"
+dependencies = [
+    "customtkinter>=5.2.2",
+    "yt-dlp>=2024.01.01",
+    "pycryptodomex",
+]
+
+[project.optional-dependencies]
+curl-cffi = ["yt-dlp[curl-cffi]"]
+
+[project.scripts]
+ytdlp-gui = "ytdlp_gui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

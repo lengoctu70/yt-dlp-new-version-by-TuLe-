@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Distribution / Packaging
+*.tar.gz
+*.zip
+
+# Debug files
+ytdlp_opts_debug.json
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Byte-compiled / optimized
+*.pyc
+*.pyo
+
+# Agent config (optional - remove if you want to track)
+# .agent/
+
+# Antigravity IDE
+.ipa-ck.json
+.agent/
