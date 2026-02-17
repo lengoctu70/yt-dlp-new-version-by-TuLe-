@@ -6,9 +6,10 @@ The yt-dlp Downloader GUI is a Python desktop application providing a user-frien
 
 ## Code Metrics
 
-- **Total Python Files**: 16
-- **Total Lines of Code**: ~2,655
+- **Total Python Files**: 16 (14 source + 1 test + 1 app init)
+- **Total Lines of Code**: ~2,822 (source only, excluding tests and init)
 - **Main Source Directory**: `src/ytdlp_gui/`
+- **Test Files**: `tests/test_sanitize.py` (111 LOC, 22 test methods)
 - **Language**: Python 3.10+
 - **Primary UI Framework**: CustomTkinter
 - **Core Dependency**: yt-dlp
@@ -36,13 +37,14 @@ Business operations and download management:
 | `config_manager.py` | Configuration persistence and defaults | 79 |
 | `__init__.py` | DownloadItem dataclass, DownloadStatus enum | 25 |
 
-### Utilities Layer (~131 LOC - 5% of codebase)
+### Utilities Layer (~238 LOC - 8% of codebase)
 Helper functions and platform-specific code:
 
 | File | Purpose | LOC |
 |------|---------|-----|
+| `sanitize.py` | 12-step filename sanitization pipeline | 107 |
 | `cookie_converter.py` | JSON to Netscape cookie format conversion | 85 |
-| `platform_utils.py` | Config and download directory management | 29 |
+| `platform_utils.py` | Config/download directories, XDG support | 29 |
 | `tool_checker.py` | FFmpeg and aria2c detection | 17 |
 
 ### Entry Point (~61 LOC - 2% of codebase)
@@ -91,32 +93,37 @@ Helper functions and platform-specific code:
 5. **Configuration Management**: Comprehensive options with validation
 
 ### Areas for Improvement
-1. **Testing**: No test suite currently implemented
-2. **Documentation**: Could benefit from more inline documentation
-3. **Logging**: Basic logging implemented, could be enhanced
+1. **Testing**: Test coverage limited to sanitize.py; expand to core modules (downloader, queue_manager, config_manager)
+2. **Documentation**: Could benefit from more inline documentation for complex logic
+3. **Logging**: Basic logging implemented, could be enhanced with configurable levels
+4. **Performance**: Memory profiling and optimization for large bulk downloads
 
 ## File Structure
 
 ```
 src/ytdlp_gui/
-├── app.py                    # Application entry point
+├── app.py                    # Application entry point (61 LOC)
 ├── core/
-│   ├── __init__.py          # DownloadItem, DownloadStatus
-│   ├── config_manager.py    # Configuration persistence
-│   ├── downloader.py        # Download engine with yt-dlp
-│   └── queue_manager.py     # Worker pool management
+│   ├── __init__.py          # DownloadItem, DownloadStatus (25 LOC)
+│   ├── config_manager.py    # Configuration persistence (92 LOC)
+│   ├── downloader.py        # Download engine with yt-dlp (426 LOC)
+│   └── queue_manager.py     # Worker pool management (157 LOC)
 ├── ui/
 │   ├── __init__.py
-│   ├── collapsible_section.py
-│   ├── main_window.py
-│   ├── queue_frame.py
-│   ├── settings_panel.py
-│   └── url_input_frame.py
+│   ├── collapsible_section.py     # Reusable toggle widget (43 LOC)
+│   ├── main_window.py             # Window composition (265 LOC)
+│   ├── queue_frame.py             # Download rows display (269 LOC)
+│   ├── settings_panel.py          # 5 collapsible sections (740 LOC)
+│   └── url_input_frame.py         # 3-column input (395 LOC)
 └── utils/
     ├── __init__.py
-    ├── cookie_converter.py
-    ├── platform_utils.py
-    └── tool_checker.py
+    ├── sanitize.py              # 12-step sanitization (107 LOC)
+    ├── cookie_converter.py      # JSON to Netscape (85 LOC)
+    ├── platform_utils.py        # Paths and XDG (29 LOC)
+    └── tool_checker.py          # FFmpeg/aria2c detect (17 LOC)
+
+tests/
+└── test_sanitize.py           # Filename sanitization tests (111 LOC, 22 tests)
 ```
 
 ## Scalability Considerations

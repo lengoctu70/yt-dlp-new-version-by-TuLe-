@@ -63,7 +63,8 @@ Cross-cutting helper functions.
 #### Components
 | Component | File | Responsibility |
 |-----------|------|----------------|
-| Platform Utils | `platform_utils.py` | Config/download directories |
+| Filename Sanitizer | `sanitize.py` | 12-step sanitization pipeline |
+| Platform Utils | `platform_utils.py` | Config/download directories, XDG support |
 | Tool Checker | `tool_checker.py` | FFmpeg/aria2c detection |
 | Cookie Converter | `cookie_converter.py` | JSON to Netscape format |
 
@@ -163,15 +164,20 @@ Debounced Save (500ms) -> config_manager.save_config
 
 ## Security Considerations
 
-- URL validation before processing
-- Path sanitization for filenames
+- URL validation before processing (format, duplicates)
+- Centralized filename sanitization via `sanitize.py` (12-step pipeline)
 - Cookie temp files cleaned after use
 - Config file permissions: user-only (0o600)
 - Proxy URL format validation
+- Cookie file permissions: user-only (0o600)
+- No plaintext password storage
 
 ## Performance Considerations
 
 - Threading prevents UI blocking during downloads
+- Configurable worker pool (1-5 concurrent downloads)
+- Queue polling at 100ms intervals (minimal CPU impact)
 - Lazy loading of tool paths (FFmpeg, aria2c)
 - Efficient temp file cleanup (scoped to download)
-- Debounced config saves reduce disk I/O
+- Debounced config saves reduce disk I/O (500ms debounce)
+- Progress hooks with selective message sending (only on significant changes)

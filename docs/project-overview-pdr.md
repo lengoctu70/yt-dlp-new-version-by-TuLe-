@@ -67,7 +67,7 @@ The yt-dlp Downloader GUI is a Python-based desktop application that provides a 
 #### Security
 - Cookie file stored with user-only permissions (0o600)
 - Proxy URL validation
-- Path sanitization for filenames
+- Centralized filename sanitization with 12-step pipeline
 - No sensitive data in logs
 
 ## Target Audience

@@ -54,10 +54,10 @@ Create a user-friendly graphical interface for yt-dlp that simplifies video and 
 ## Technical Debt & Maintenance
 
 ### Immediate Priorities (Next 2 weeks)
-- Add comprehensive test suite
-- Improve error handling edge cases
+- Expand test coverage beyond sanitize.py (add tests for downloader, queue_manager, config_manager)
+- Implement edge case testing for error scenarios
 - Add logging configuration UI
-- Optimize UI responsiveness
+- Optimize UI responsiveness during bulk operations
 
 ### Short-term (Next 1-2 months)
 - Implement download history persistence
@@ -74,16 +74,18 @@ Create a user-friendly graphical interface for yt-dlp that simplifies video and 
 ## Quality Metrics Targets
 
 ### Code Quality
-- Maintain test coverage above 80%
+- Achieve and maintain test coverage above 80%
 - Keep code duplication below 5%
-- All new code must pass linting
+- All new code must pass linting (PEP 8, type hints)
 - Documentation coverage: 90% of public APIs
+- Current test coverage: 22 tests in test_sanitize.py for filename sanitization
 
 ### Performance
 - Application startup time: < 3 seconds
-- UI response time: < 100ms
-- Memory usage: < 150MB idle
-- CPU usage: < 10% during downloads (excluding yt-dlp)
+- UI response time: < 100ms for all interactions
+- Memory usage: < 150MB idle, < 300MB with 5 concurrent downloads
+- CPU usage: < 10% during downloads (excluding yt-dlp process)
+- Queue polling overhead: < 5% CPU at 100ms polling interval
 
 ## Dependencies
 

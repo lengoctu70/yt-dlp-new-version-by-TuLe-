@@ -16,11 +16,12 @@ A modern graphical user interface for the yt-dlp command-line tool, providing an
 
 ## Requirements
 
-- Python 3.10 or higher
-- yt-dlp
-- CustomTkinter
+- Python 3.10+ (tested on 3.10, 3.11, 3.12+)
+- yt-dlp (latest)
+- CustomTkinter 5.2+
 - pycryptodomex
-- FFmpeg (optional, for post-processing)
+- FFmpeg 4.2+ (optional, for post-processing)
+- curl-cffi (optional, for browser impersonation)
 
 ## Installation
 
@@ -78,31 +79,35 @@ This will install Python (if needed), download required tools, and configure the
 
 ```
 src/ytdlp_gui/
-├── app.py                    # Application entry point
-├── core/                     # Business logic
-│   ├── config_manager.py    # Configuration persistence
-│   ├── downloader.py        # yt-dlp download engine
-│   └── queue_manager.py     # Concurrent download workers
-├── ui/                       # User interface
+├── app.py                         # Entry point (61 LOC)
+├── core/                          # Business logic (~700 LOC)
+│   ├── config_manager.py         # Config persistence (92 LOC)
+│   ├── downloader.py             # yt-dlp integration (426 LOC)
+│   └── queue_manager.py          # Worker pool (157 LOC)
+├── ui/                            # UI components (~1,700 LOC)
 │   ├── main_window.py
 │   ├── settings_panel.py
 │   ├── queue_frame.py
 │   ├── url_input_frame.py
 │   └── collapsible_section.py
-└── utils/                    # Helper utilities
+└── utils/                         # Helpers (~240 LOC)
+    ├── sanitize.py              # Filename sanitization
     ├── cookie_converter.py
     ├── platform_utils.py
     └── tool_checker.py
+
+tests/
+└── test_sanitize.py               # 22 test methods
 ```
 
 ## Documentation
 
-- [Project Overview & PDR](./docs/project-overview-pdr.md)
-- [Code Standards](./docs/code-standards.md)
-- [System Architecture](./docs/system-architecture.md)
-- [Codebase Summary](./docs/codebase-summary.md)
-- [Deployment Guide](./docs/deployment-guide.md)
-- [Project Roadmap](./docs/project-roadmap.md)
+- [Project Overview & PDR](./docs/project-overview-pdr.md) - Features, requirements, tech stack
+- [Code Standards](./docs/code-standards.md) - Style guide, patterns, testing standards
+- [System Architecture](./docs/system-architecture.md) - Layers, data flow, threading model
+- [Codebase Summary](./docs/codebase-summary.md) - Code metrics, file organization
+- [Deployment Guide](./docs/deployment-guide.md) - Setup, troubleshooting, uninstall/update
+- [Project Roadmap](./docs/project-roadmap.md) - Phases, priorities, metrics
 
 ## Contributing
 

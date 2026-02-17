@@ -82,7 +82,8 @@ def download_video(url: str, output_path: str, quality: str) -> bool:
 ### Utility Modules
 | Module | Responsibility |
 |--------|----------------|
-| `platform_utils.py` | Config/download directories |
+| `sanitize.py` | 12-step filename sanitization pipeline |
+| `platform_utils.py` | Config/download directories, XDG support |
 | `tool_checker.py` | FFmpeg and aria2c detection |
 | `cookie_converter.py` | JSON to Netscape format conversion |
 
@@ -150,20 +151,27 @@ def poll_queue():
 
 ## Testing Standards
 
-### Unit Testing (Recommended)
+### Unit Testing
 - Use pytest framework
 - Mock external dependencies
 - Test both success and failure cases
+- Current test coverage: `test_sanitize.py` (22 test methods covering filename sanitization)
 
 ```python
-# Example test structure (to be implemented)
+# Example from test_sanitize.py
 import pytest
-from unittest.mock import patch
-from ytdlp_gui.core.downloader import Downloader
+from ytdlp_gui.utils.sanitize import sanitize_filename
 
-def test_download_cancelled():
-    # Test cancellation logic
-    pass
+def test_sanitize_removes_invalid_chars():
+    """Test that invalid characters are properly removed."""
+    assert sanitize_filename("file<>name") == "filename"
+    assert sanitize_filename("path/to/file") == "pathtofile"
+```
+
+### Test Execution
+```bash
+pytest tests/
+pytest tests/test_sanitize.py -v  # Verbose output
 ```
 
 ## Version Management

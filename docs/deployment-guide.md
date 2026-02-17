@@ -13,11 +13,12 @@
 
 ### Prerequisites
 
-1. **Python**: Version 3.10 or higher
+1. **Python**: Version 3.10+ (tested with 3.10, 3.11, 3.12+)
 2. **Operating System**: Windows 10+, macOS 10.14+, or Linux
 3. **External Tools** (optional but recommended):
-   - FFmpeg (for video/audio processing)
-   - aria2c (for accelerated downloads)
+   - FFmpeg 4.2+ (for video/audio processing)
+   - aria2c 1.36+ (for accelerated downloads)
+   - curl-cffi (for browser impersonation support)
 
 ### Setup Steps
 
@@ -52,6 +53,8 @@
    ```bash
    pip install 'yt-dlp[curl-cffi]'
    ```
+
+   This adds browser impersonation capabilities for bypassing blocks.
 
 ## Running from Source
 
@@ -185,8 +188,19 @@ This creates a wheel in `dist/` that can be installed with pip.
 5. **Download Failures**
    - Check internet connection
    - Update yt-dlp: `pip install -U yt-dlp`
-   - Try Anti-Block mode in settings
+   - Try Anti-Block mode in settings (adds sleep delays)
    - Configure proxy if behind firewall
+   - Enable browser impersonation in Settings > Anti-Bot if curl-cffi is installed
+
+6. **Proxy Configuration Issues**
+   - Verify proxy URL format: `http://proxy.example.com:8080` or `socks5://proxy:1080`
+   - Check proxy credentials if required
+   - Test proxy separately before configuring in app
+
+7. **Filename Sanitization Warnings**
+   - Invalid characters in filenames are automatically removed/replaced
+   - Check download logs for sanitization details
+   - Custom output templates should avoid special characters
 
 ### Debug Mode
 
@@ -219,3 +233,40 @@ Configuration is stored in:
 - macOS/Linux: `~/.ytdlp-gui/config.json`
 
 The file is created automatically on first run with sensible defaults.
+
+## Uninstalling
+
+### From Virtual Environment
+```bash
+# Deactivate virtual environment
+deactivate
+
+# Delete virtual environment directory
+rm -rf .venv  # macOS/Linux
+rmdir .venv   # Windows
+```
+
+### From System (pip install)
+```bash
+pip uninstall ytdlp-gui
+```
+
+## Updating
+
+### Update from Source
+```bash
+# Pull latest changes
+git pull origin main
+
+# Reinstall with dependencies
+pip install -e .
+```
+
+### Update yt-dlp Engine
+```bash
+pip install -U yt-dlp
+```
+
+### Update External Tools
+- **FFmpeg**: Download latest from [ffmpeg.org](https://ffmpeg.org) or use package manager
+- **aria2c**: Download latest from [GitHub releases](https://github.com/aria2/aria2/releases)
