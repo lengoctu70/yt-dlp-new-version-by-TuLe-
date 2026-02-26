@@ -18,6 +18,23 @@ SOCKET_TIMEOUT = 30
 DEFAULT_FORMAT = "bestvideo+bestaudio/best"
 ARIA2C_CHUNK_SIZE = "1M"
 
+# Common media extensions that users might include in filenames
+_MEDIA_EXTENSIONS = frozenset({
+    ".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".m4v",
+    ".mp3", ".m4a", ".wav", ".flac", ".aac", ".ogg", ".opus", ".wma",
+    ".srt", ".vtt", ".ass", ".ssa", ".sub",
+    ".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".tiff",
+})
+
+
+def _has_media_extension(name: str) -> bool:
+    """Check if filename has a recognized media extension.
+
+    Avoids false positives from dots in titles like '7.1 - Origins'.
+    """
+    suffix = Path(name).suffix.lower()
+    return suffix in _MEDIA_EXTENSIONS
+
 
 class DownloadCancelled(Exception):
     pass
@@ -112,7 +129,7 @@ class Downloader:
             if not safe_name or safe_name == "download":
                 safe_name = "%(title)s"
             outtmpl = str(Path(folder) / safe_name)
-            if not Path(safe_name).suffix:
+            if not _has_media_extension(safe_name):
                 outtmpl += ".%(ext)s"
         else:
             outtmpl = str(Path(folder) / "%(title)s.%(ext)s")
