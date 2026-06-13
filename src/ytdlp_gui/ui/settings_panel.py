@@ -1,5 +1,9 @@
 import logging
 import re
+import subprocess
+import sys
+import threading
+from pathlib import Path
 from tkinter import filedialog
 from typing import Callable
 
@@ -64,7 +68,7 @@ class SettingsPanel(ctk.CTkFrame):
     def _bind_entry_focusout(self):
         """Bind <FocusOut> on all entry/textbox widgets to trigger config save."""
         entries = [
-            self._ffmpeg_entry, self._aria2c_entry,
+            self._ytdlp_entry, self._ffmpeg_entry, self._aria2c_entry,
             self._cookie_file_entry,
             self._proxy_entry, self._ua_entry, self._referer_entry,
             self._format_entry, self._rate_entry, self._retries_entry,
@@ -79,12 +83,40 @@ class SettingsPanel(ctk.CTkFrame):
         for tb in textboxes:
             tb.bind("<FocusOut>", lambda e: self._on_change())
 
+        # Re-check tool status when the yt-dlp path is edited by hand
+        self._ytdlp_entry.bind("<FocusOut>", lambda e: self._update_tool_status(), add="+")
+
     # --- Tools Section (S-04a) ---
 
     def _build_tools_section(self):
         section = CollapsibleSection(self, "Tools")
         section.pack(fill="x", pady=(0, 8))
         cf = section.content_frame
+
+        # yt-dlp binary row — empty = built-in engine, path = user's own download
+        ctk.CTkLabel(cf, text="yt-dlp Path (custom binary)", font=ctk.CTkFont(size=13)).pack(anchor="w", pady=(0, 4))
+        ytdlp_row = ctk.CTkFrame(cf, fg_color="transparent")
+        ytdlp_row.pack(fill="x", pady=(0, 4))
+
+        self._ytdlp_entry = ctk.CTkEntry(ytdlp_row, placeholder_text="Empty = built-in yt-dlp")
+        self._ytdlp_entry.pack(side="left", fill="x", expand=True, padx=(0, 8))
+
+        ctk.CTkButton(
+            ytdlp_row, text="Browse", width=70, command=self._browse_ytdlp
+        ).pack(side="left", padx=(0, 8))
+
+        self._ytdlp_status = ctk.CTkLabel(ytdlp_row, text="", font=ctk.CTkFont(size=11), width=80)
+        self._ytdlp_status.pack(side="left")
+
+        ctk.CTkLabel(
+            cf,
+            text="Select yt-dlp / yt-dlp.exe you downloaded to use a newer version than the built-in one.",
+            font=ctk.CTkFont(size=11),
+            text_color=("gray40", "gray60"),
+            anchor="w",
+            wraplength=420,
+            justify="left",
+        ).pack(fill="x", pady=(0, 8))
 
         # FFmpeg row
         ctk.CTkLabel(cf, text="FFmpeg Path", font=ctk.CTkFont(size=13)).pack(anchor="w", pady=(0, 4))
@@ -444,6 +476,7 @@ class SettingsPanel(ctk.CTkFrame):
         values = {}
 
         # Tools
+        values["ytdlp_path"] = self._ytdlp_entry.get().strip()
         values["ffmpeg_path"] = self._ffmpeg_entry.get()
         values["aria2c_path"] = self._aria2c_entry.get()
         values["aria2c_enabled"] = bool(self._aria2c_switch.get())
@@ -521,6 +554,7 @@ class SettingsPanel(ctk.CTkFrame):
         self._suppress_callbacks = True
 
         # Tools
+        self._set_entry(self._ytdlp_entry, config.get("ytdlp_path", ""))
         self._set_entry(self._ffmpeg_entry, config.get("ffmpeg_path", ""))
         self._set_entry(self._aria2c_entry, config.get("aria2c_path", ""))
         if config.get("aria2c_enabled"):
@@ -696,6 +730,13 @@ class SettingsPanel(ctk.CTkFrame):
 
     # --- Browse dialogs ---
 
+    def _browse_ytdlp(self):
+        path = filedialog.askopenfilename(title="Select yt-dlp binary")
+        if path:
+            self._set_entry(self._ytdlp_entry, path)
+            self._update_tool_status()
+            self._on_change()
+
     def _browse_ffmpeg(self):
         path = filedialog.askopenfilename(title="Select FFmpeg")
         if path:
@@ -721,6 +762,8 @@ class SettingsPanel(ctk.CTkFrame):
     # --- Utilities ---
 
     def _update_tool_status(self):
+        self._update_ytdlp_status()
+
         ffmpeg = find_ffmpeg(self._ffmpeg_entry.get())
         if ffmpeg:
             self._ffmpeg_status.configure(text="Found", text_color=("#2e7d32", "#4caf50"))
@@ -732,6 +775,42 @@ class SettingsPanel(ctk.CTkFrame):
             self._aria2c_status.configure(text="Found", text_color=("#2e7d32", "#4caf50"))
         else:
             self._aria2c_status.configure(text="Not Found", text_color=("#c62828", "#ef5350"))
+
+    def _update_ytdlp_status(self):
+        """Show engine for the yt-dlp path: built-in, version of custom binary, or not found."""
+        path = self._ytdlp_entry.get().strip()
+        if not path:
+            self._ytdlp_status.configure(text="Built-in", text_color=("gray40", "gray60"))
+            return
+        if not Path(path).is_file():
+            self._ytdlp_status.configure(text="Not Found", text_color=("#c62828", "#ef5350"))
+            return
+
+        self._ytdlp_status.configure(text="Checking...", text_color=("gray40", "gray60"))
+        threading.Thread(target=self._check_ytdlp_version, args=(path,), daemon=True).start()
+
+    def _check_ytdlp_version(self, path: str):
+        """Run `<binary> --version` off the UI thread and report the result."""
+        try:
+            kwargs = {"capture_output": True, "text": True, "timeout": 15}
+            if sys.platform == "win32":
+                kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+            result = subprocess.run([path, "--version"], **kwargs)
+            version = result.stdout.strip().splitlines()[0] if result.returncode == 0 and result.stdout.strip() else ""
+        except (OSError, subprocess.SubprocessError) as e:
+            logger.warning("yt-dlp version check failed for %s: %s", path, e)
+            version = ""
+
+        def apply():
+            if version:
+                self._ytdlp_status.configure(text=version, text_color=("#2e7d32", "#4caf50"))
+            else:
+                self._ytdlp_status.configure(text="Invalid", text_color=("#c62828", "#ef5350"))
+
+        try:
+            self.after(0, apply)
+        except RuntimeError:
+            pass  # widget destroyed while the check was running
 
     @staticmethod
     def _set_entry(entry: ctk.CTkEntry, value: str):

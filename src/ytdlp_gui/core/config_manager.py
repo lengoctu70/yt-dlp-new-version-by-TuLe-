@@ -9,6 +9,7 @@ from ytdlp_gui.utils.platform_utils import get_config_dir, get_default_download_
 DEFAULT_CONFIG = {
     "default_folder": "",
     "theme": "dark",
+    "ytdlp_path": "",
     "ffmpeg_path": "",
     "aria2c_path": "",
     "aria2c_enabled": False,

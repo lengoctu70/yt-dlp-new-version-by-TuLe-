@@ -12,6 +12,7 @@ A modern graphical user interface for the yt-dlp command-line tool, providing an
 - **Audio Extraction**: Convert downloads to MP3, M4A, Opus, or FLAC
 - **Anti-Block Mode**: Built-in delays and request throttling
 - **External Downloader**: Optional aria2c support for faster downloads
+- **Custom yt-dlp Binary**: Point the app at your own downloaded yt-dlp (Settings → Tools) to use a newer version than the bundled one
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 
 ## Requirements
@@ -69,7 +70,7 @@ This will install Python (if needed), download required tools, and configure the
 
 ### Settings
 
-- **Tools**: Configure FFmpeg and aria2c paths
+- **Tools**: Configure yt-dlp binary, FFmpeg and aria2c paths. Setting a custom yt-dlp path switches downloads to that binary (fixes outdated-extractor errors like Vimeo `Failed to parse XML`); leave empty to use the built-in engine
 - **Cookie Settings**: Use browser cookies, cookie files, or JSON
 - **Anti-Bot/Bypass**: Enable impersonation, set proxy, custom headers
 - **Advanced Options**: Quality presets, format strings, rate limits, sleep intervals
@@ -81,9 +82,11 @@ This will install Python (if needed), download required tools, and configure the
 src/ytdlp_gui/
 ├── app.py                         # Entry point (61 LOC)
 ├── core/                          # Business logic (~700 LOC)
-│   ├── config_manager.py         # Config persistence (92 LOC)
-│   ├── downloader.py             # yt-dlp integration (426 LOC)
-│   └── queue_manager.py          # Worker pool (157 LOC)
+│   ├── config_manager.py         # Config persistence
+│   ├── downloader.py             # Embedded yt-dlp API engine
+│   ├── cli_args_builder.py       # Config → yt-dlp CLI args
+│   ├── cli_downloader.py         # Custom yt-dlp binary engine (subprocess)
+│   └── queue_manager.py          # Worker pool + engine dispatch
 ├── ui/                            # UI components (~1,700 LOC)
 │   ├── main_window.py
 │   ├── settings_panel.py

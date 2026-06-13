@@ -4,7 +4,7 @@ import random
 import threading
 
 from ytdlp_gui.core import DownloadItem, DownloadStatus
-from ytdlp_gui.core.downloader import Downloader
+from ytdlp_gui.core.cli_downloader import CliDownloader, resolve_custom_ytdlp
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,28 @@ class QueueManager:
 
                 # Use a snapshot copy of config for thread safety
                 config_snapshot = dict(self._config)
-                downloader = Downloader(config_snapshot, cancel_event, self._ui_queue, item.id)
+                # Custom yt-dlp binary selected → external CLI engine;
+                # otherwise embedded yt_dlp Python API
+                ytdlp_bin = resolve_custom_ytdlp(config_snapshot)
+                if ytdlp_bin:
+                    downloader = CliDownloader(
+                        config_snapshot, cancel_event, self._ui_queue, item.id, ytdlp_bin
+                    )
+                else:
+                    # Lazy import so the app still runs with only a custom
+                    # binary when the yt_dlp pip package is not installed
+                    try:
+                        from ytdlp_gui.core.downloader import Downloader
+                    except ImportError:
+                        logger.error("yt_dlp package not installed and no custom binary set")
+                        self._ui_queue.put({
+                            "type": "status",
+                            "id": item.id,
+                            "status": DownloadStatus.FAILED.value,
+                            "error": "yt_dlp package not installed. Set a custom yt-dlp binary in Tools settings.",
+                        })
+                        continue
+                    downloader = Downloader(config_snapshot, cancel_event, self._ui_queue, item.id)
                 downloader.download(item.url, item.folder, item.filename)
             finally:
                 if isinstance(item, DownloadItem):

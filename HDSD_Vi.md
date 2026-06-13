@@ -107,6 +107,18 @@ set PATH=%PATH%;C:\aria2
 
 **Hoặc:** Bật trong app → Settings → aria2c
 
+## 6b. Dùng yt-dlp bản tự tải (khuyên dùng khi gặp lỗi extractor)
+
+Khi gặp lỗi kiểu `Failed to parse XML` (Vimeo) hoặc cảnh báo impersonation, nguyên nhân thường là yt-dlp tích hợp sẵn đã cũ. Cách fix:
+
+1. Tải bản yt-dlp mới nhất: https://github.com/yt-dlp/yt-dlp/releases
+   - Windows: `yt-dlp.exe`
+   - macOS/Linux: `yt-dlp_macos` / `yt-dlp` (nhớ `chmod +x`)
+2. Mở app → Settings → Tools → **yt-dlp Path** → Browse → chọn file vừa tải
+3. Status hiện số phiên bản (vd `2026.06.10`) là OK. Để trống = dùng bản tích hợp sẵn.
+
+Bản tự chọn vẫn dùng đầy đủ: Referer/headers, cookies, proxy, impersonate, aria2c, extract audio, progress, cancel.
+
 ## 7. Lỗi thường gặp & cách fix
 
 | Lỗi | Nguyên nhân | Cách fix |
@@ -118,6 +130,8 @@ set PATH=%PATH%;C:\aria2
 | `ffmpeg not found` | Chưa cài hoặc chưa thêm PATH | Xem bước 5 |
 | `PermissionError` khi cài | Cần quyền admin | Chạy CMD với "Run as Administrator" |
 | `ERROR: No video formats found` | Video cần cookie đăng nhập | Xem mục 8 bên dưới |
+| `Failed to parse XML` (Vimeo) | yt-dlp tích hợp đã cũ | Dùng yt-dlp bản tự tải (xem mục 6b) |
+| Cảnh báo `impersonation... no impersonate target` | Thiếu curl-cffi | Dùng yt-dlp.exe bản standalone (mục 6b) hoặc `pip install curl-cffi` |
 | `Failed to decrypt with DPAPI` | Chrome cookie bị mã hóa | Dùng cookie file thay vì browser (xem mục 8) |
 | App bị treo khi tải | Quá nhiều download đồng thời | Settings → giảm concurrent downloads xuống 1-2 |
 
